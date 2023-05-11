@@ -1,8 +1,22 @@
+import { useEffect, useState } from "react";
 import HeroBenner from "../../components/HeroBenner";
-import Product from "../../components/ProductCard";
+import ProductCard from "../../components/ProductCard";
 import Wrapper from "../../components/Wrapper";
+import { fetchDataFromApi } from "../../utils/api";
+import Image from "next/image";
 
-export default function Home() {
+export default function Home({ products }: any) {
+  // const [data, setData] = useState(null);
+
+  // useEffect(() => {
+  //   // fetchProduct();
+  // }, []);
+
+  // const fetchProduct = async () => {
+  //   const products = await fetchDataFromApi("/api/produts");
+  //   setData(products);
+  // };
+
   return (
     <>
       <main className="">
@@ -23,16 +37,25 @@ export default function Home() {
 
           {/* product list start */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 my-14 px-5 md:px-0">
-            <Product />
-            <Product />
-            <Product />
-            <Product />
-            <Product />
-            <Product />
+            {products?.data?.map((product:any) => {
+              return (
+                <>
+                  <ProductCard key={product?.id} data={product}/>
+                </>
+              );
+            })}
           </div>
           {/* product list End */}
         </Wrapper>
       </main>
     </>
   );
+}
+
+export async function getStaticProps() {
+  const products = await fetchDataFromApi("/api/produts?populate=*");
+
+  return {
+    props: { products },
+  };
 }

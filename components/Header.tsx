@@ -1,18 +1,24 @@
 import React, { useEffect, useState } from "react";
 import Wrapper from "./Wrapper";
 import Link from "next/link";
+import Image from "next/image";
 import Menu from "./Menu";
-import { BsCart } from "react-icons/bs";
+import { BsCardImage, BsCart } from "react-icons/bs";
 import { AiOutlineHeart } from "react-icons/ai";
 import { BiMenuAltRight } from "react-icons/bi";
 import { VscChromeClose } from "react-icons/vsc";
 import MenuMobile from "./MenuMobile";
+import { fetchDataFromApi } from "../utils/api";
+import { useSelector } from "react-redux";
 
 const Header = () => {
   const [mobileMenu, setMobileMenu] = useState(false);
   const [showCatMenu, setshowCatMenu] = useState(false);
   const [show, setshow] = useState("translate-y-0");
   const [lastScrolly, setLastScrolly] = useState(0);
+  const [category, setcategory] = useState(null);
+
+  const { cartItems } = useSelector((state: any) => state.cart);
 
   const NavbarControll = () => {
     if (window.scrollY > 200) {
@@ -34,6 +40,15 @@ const Header = () => {
     };
   }, [lastScrolly]);
 
+  useEffect(() => {
+    fatchCategories();
+  }, []);
+
+  const fatchCategories = async () => {
+    const { data } = await fetchDataFromApi("/api/categories?populate=*");
+    setcategory(data);
+  };
+
   return (
     <header
       className={`w-full h-[50px] md:h-[80px] bg-white flex items-center justify-between z-20 sticky top-0 transition-transform duration-300 ${show}`}
@@ -42,13 +57,18 @@ const Header = () => {
         <Link href={"/"}>
           <img src="/logo.svg" className="w-[40px] md:w-[60px]" />
         </Link>
-        <Menu showCatMenu={showCatMenu} setshowCatMenu={setshowCatMenu} />
+        <Menu
+          showCatMenu={showCatMenu}
+          setshowCatMenu={setshowCatMenu}
+          categories={category}
+        />
 
         {mobileMenu && (
           <MenuMobile
             showCatMenu={showCatMenu}
             setshowCatMenu={setshowCatMenu}
             setMobileMenu={setMobileMenu}
+            categories={category}
           />
         )}
 
@@ -65,9 +85,11 @@ const Header = () => {
           <Link href={"/cart"}>
             <div className="w-8 md:w-12 h-8 md:h-12 rounded-full flex justify-center items-center hover:bg-black/[0.05] cursor-pointer relative">
               <BsCart className=" text-[15px] md:text-[20px]" />
-              <div className=" h-[14px] md:[18px] min-w-[14px] md:min-w-[18px] rounded-full bg-red-600 absolute top-1 left-5 md:left-7 text-white text-[10px] md:text-[12px] flex justify-center items-center px-[2px] md:px-[5px] md:py-[9px]">
-                5
-              </div>
+              {cartItems.length > 0 && (
+                <div className=" h-[14px] md:[18px] min-w-[14px] md:min-w-[18px] rounded-full bg-red-600 absolute top-1 left-5 md:left-7 text-white text-[10px] md:text-[12px] flex justify-center items-center px-[2px] md:px-[5px] md:py-[9px]">
+                  {cartItems.length}
+                </div>
+              )}
             </div>
           </Link>
           {/* icon end */}
